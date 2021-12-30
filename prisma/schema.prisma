@@ -2,11 +2,42 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["mongoDb"]
 }
 
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+model Collection {
+  id    String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name  String
+  notes Note[]
+}
+
+model Note {
+  id           String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  body         String
+  createdAt    DateTime    @default(now())
+  completed    Boolean     @default(false)
+  tags         Tag[]
+  noteType     NoteType    @relation(fields: [noteTypeId], references: [id])
+  noteTypeId   String      @db.ObjectId
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+  collectionId String?     @db.ObjectId
+}
+
+model Tag {
+  id     String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name   String
+  note   Note?   @relation(fields: [noteId], references: [id])
+  noteId String? @db.ObjectId
+}
+
+model NoteType {
+  id   String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name String
+  note Note[]
 }
