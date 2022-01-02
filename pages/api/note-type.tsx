@@ -1,14 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { NoteType, PrismaClient } from "@prisma/client";
+import { NoteTypes } from "@prisma/client";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Array<NoteType>>
+  res: NextApiResponse<Array<string>>
 ) {
-  const prisma = new PrismaClient();
   switch (req.method) {
     case "GET":
-      const types = await prisma.noteType.findMany();
+      const types = Object.keys(NoteTypes);
       res.status(200).json(types);
       break;
   }
