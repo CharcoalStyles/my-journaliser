@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { NoteTypes } from "@prisma/client";
+import { NoteModifiers } from "@prisma/client";
 
 type ReturnData = {
-  types: Array<string>;
+  mods: Array<string>;
 };
 
 export default async function handler(
@@ -11,8 +11,8 @@ export default async function handler(
 ) {
   switch (req.method) {
     case "GET":
-      const types = Object.keys(NoteTypes);
-      res.status(200).json({ types });
+      const mods = Object.keys(NoteModifiers);
+      res.status(200).json({ mods });
       break;
   }
 }

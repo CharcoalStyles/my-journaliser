@@ -1,12 +1,18 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import { Header } from "../src/components/Header";
 import { NoteList } from "../src/components/NoteList";
 import styles from "../styles/Home.module.scss";
 import defaultStyles from "../styles/default.module.scss";
+import { PrismaClient } from "@prisma/client";
+import { DisplayNote, noteToDisplayNote } from "../src/db/access";
+import { format, set } from "date-fns";
 
-const Home: NextPage = () => {
+type HomeProps = {
+  notes: Array<DisplayNote>;
+};
+
+const Home: NextPage<HomeProps> = ({ notes }) => {
   return (
     <div className={styles.container}>
       <Head>
@@ -19,34 +25,8 @@ const Home: NextPage = () => {
         <Header />
         <div className={styles.content}>
           <h2 className={defaultStyles.title}>Daily Log</h2>
-          <NoteList
-            notes={[
-              {
-                body: "Hello world",
-                createdAt: new Date(),
-                collectionId: null,
-                id: "1",
-                completed: false,
-                noteType: "TASK",
-              },
-              {
-                body: "Hello world, again",
-                createdAt: new Date(),
-                collectionId: null,
-                id: "1",
-                completed: true,
-                noteType: "NOTE",
-              },
-              {
-                body: "Hello world, again, again",
-                createdAt: new Date(),
-                collectionId: null,
-                id: "1",
-                completed: false,
-                noteType: "EVENT",
-              },
-            ]}
-          />
+          <p className={styles.date}>{format(new Date(), "eee do LLL yyyy")}</p>
+          <NoteList notes={notes} />
         </div>
       </main>
     </div>
@@ -54,3 +34,38 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  const prisma = new PrismaClient();
+  const current = new Date();
+
+  const notes = await prisma.note.findMany({
+    where: {
+      AND: [
+        {
+          createdAt: {
+            gt: set(current, {
+              hours: 0,
+              minutes: 0,
+              seconds: 0,
+              milliseconds: 0,
+            }),
+          },
+        },
+        { createdAt: { lt: set(current, {
+          hours: 23,
+          minutes: 59,
+          seconds: 59,
+          milliseconds: 999,
+        }) } },
+      ],
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return {
+    props: {
+      notes: notes.map((note) => noteToDisplayNote(note)),
+    }, // will be passed to the page component as props
+  };
+};
