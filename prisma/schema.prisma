@@ -11,32 +11,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// CHANGE: Add your own note types here
-enum NoteTypes {
-  TASK
-  NOTE
-  EVENT
-}
-
 // CHANGE: Add your own note modifiers here
-enum NoteModifiers {
-  PRIORITY
-  INSPIRATION
+// enum NoteModifiers {
+//   PRIORITY
+//   INSPIRATION
+// }
+
+model Note {
+  id           String         @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  body         String
+  createdAt    DateTime       @default(now())
+  completed    Boolean        @default(false)
+  noteType     NoteType       @relation(fields: [noteTypeId], references: [id])
+  noteTypeId   String         @db.ObjectId
+  collection   Collection     @relation(fields: [collectionId], references: [id])
+  collectionId String         @db.ObjectId
+  otherDate    DateTime?
+  noteModIds    String[]
 }
 
 model Collection {
-  id    String @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  name  String
-  notes Note[]
+  id                String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name              String
+  otherDateRequired Boolean
+  notes             Note[]
 }
 
-model Note {
-  id           String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  body         String
-  createdAt    DateTime    @default(now())
-  completed    Boolean     @default(false)
-  noteType     NoteTypes
-  collection   Collection? @relation(fields: [collectionId], references: [id])
-  collectionId String?     @db.ObjectId
-  modifiers    NoteModifiers[]
+model NoteType {
+  id   String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name String
+  Note Note[]
+}
+
+model NoteModifier {
+  id     String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name   String
+  char   String
 }

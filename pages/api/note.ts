@@ -1,20 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Note, NoteModifiers, NoteTypes, PrismaClient } from "@prisma/client";
+import { Note, NoteModifier, PrismaClient } from "@prisma/client";
 import { defaultCollection, defaultNoteType } from "../../src/settings";
 
 type PostNote = {
   body: string;
-  noteType: NoteTypes;
+  noteTypeId: string;
   collectionId: string;
-  modifiers: Array<NoteModifiers>;
+  modifiers: Array<string>;
 };
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Array<Note> | string>
 ) {
-    console.log(req.method);
-    console.log('body', req.body);
+  console.log(req.method);
+  console.log("body", req.body);
   const prisma = new PrismaClient();
   switch (req.method) {
     case "GET":
@@ -26,19 +26,40 @@ export default async function handler(
         res.status(400).json("Content is required for POST");
         return;
       }
-      
-      const { body, noteType, collectionId, modifiers }: PostNote = JSON.parse(req.body);
-      let confirmedCollection;
+
+      const { body, noteTypeId, collectionId, modifiers }: PostNote =
+        JSON.parse(req.body);
+      let confirmedNoteType: string | undefined;
+      let confirmedCollection: string | undefined;
+      let confirmedModifiers: Array<NoteModifier> = [];
+
       if (!body) {
         res.status(400).json("Body is required for POST");
         return;
       }
-      if (noteType) {
-        if (!Object.values(NoteTypes).includes(noteType)) {
-          res.status(400).json("Invalid noteType");
+
+      if (noteTypeId) {
+        const noteType = await prisma.noteType.findFirst({
+          where: {
+            id: noteTypeId,
+          },
+        });
+        if (!noteType) {
+          res.status(400).json("Invalid noteTypeId");
           return;
+        } else {
+          confirmedNoteType = noteTypeId;
         }
+      } else {
+        confirmedNoteType = (
+          await prisma.noteType.findFirst({
+            where: {
+              name: defaultNoteType,
+            },
+          })
+        )?.id;
       }
+
       if (collectionId) {
         const collection = await prisma.collection.findFirst({
           where: {
@@ -55,23 +76,39 @@ export default async function handler(
         confirmedCollection = (
           await prisma.collection.findFirst({
             where: {
-              name: defaultCollection,
+              name: defaultCollection.name,
             },
           })
         )?.id;
       }
-      const d = {
-        body,
-        noteType: noteType || defaultNoteType,
-        collectionId: confirmedCollection,
-        modifiers: modifiers,
-      };
-      console.log(d);
 
-      await prisma.note.create({
-        data: d,
-      });
-      res.status(200).json("Note created");
+      if (modifiers.length > 0) {
+        const noteMods = await prisma.noteModifier.findMany();
+        confirmedModifiers = modifiers
+          .map((mod) => {
+            const noteMod = noteMods.find((modifier) => modifier.char === mod);
+            if (noteMod) {
+              return noteMod;
+            }
+            return undefined;
+          })
+          .filter((noteMod): noteMod is NoteModifier => noteMod !== undefined);
+      }
+      if (!confirmedNoteType || !confirmedCollection) {
+        res.status(400).json("Something went wrong with defaults");
+        return;
+      } else {
+
+        await prisma.note.create({
+          data: {
+            body,
+            noteTypeId: confirmedNoteType,
+            collectionId: confirmedCollection,
+            noteModIds: confirmedModifiers.map((mod) => mod.id),
+          },
+        });
+        res.status(201).json("Note created");
+      }
       break;
   }
   return;

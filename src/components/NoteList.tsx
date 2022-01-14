@@ -15,7 +15,7 @@ export const NoteList = ({ notes }: NoteListProps) => {
     <>
       {notes.map((note) => (
         <div key={note.id} className={getListClass(note)}>
-          <span className={styles.bullet}>{note.noteType}</span>
+          <span className={styles.bullet}>{note.noteType.name}</span>
           {note.body}
         </div>
       ))}

@@ -9,21 +9,23 @@
     "db-init": "ts-node ./src/db/init.ts"
   },
   "dependencies": {
-    "@prisma/client": "^3.7.0",
+    "@prisma/client": "^3.8.0",
     "axios": "^0.24.0",
     "bson": "^4.6.0",
     "date-fns": "^2.28.0",
     "next": "12.0.7",
     "react": "17.0.2",
+    "react-datepicker": "^4.6.0",
     "react-dom": "17.0.2",
     "sass": "^1.45.2"
   },
   "devDependencies": {
     "@types/node": "17.0.5",
     "@types/react": "17.0.38",
+    "@types/react-datepicker": "^4.3.4",
     "eslint": "8.5.0",
     "eslint-config-next": "12.0.7",
-    "prisma": "^3.7.0",
+    "prisma": "^3.8.0",
     "ts-node": "^10.4.0",
     "typescript": "4.5.4"
   }

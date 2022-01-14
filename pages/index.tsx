@@ -6,13 +6,22 @@ import styles from "../styles/Home.module.scss";
 import defaultStyles from "../styles/default.module.scss";
 import { PrismaClient } from "@prisma/client";
 import { DisplayNote, noteToDisplayNote } from "../src/db/access";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
+import React, { useEffect, useState } from "react";
+import { getNotesForDate } from "../src/db/note";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 type HomeProps = {
   notes: Array<DisplayNote>;
 };
 
 const Home: NextPage<HomeProps> = ({ notes }) => {
+  const [startDate, setStartDate] = useState(new Date());
+  const [currentNotes, setCurrentNotes] = useState(notes);
+
+  useEffect(() => {}, [startDate]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -25,8 +34,18 @@ const Home: NextPage<HomeProps> = ({ notes }) => {
         <Header />
         <div className={styles.content}>
           <h2 className={defaultStyles.title}>Daily Log</h2>
-          <p className={styles.date}>{format(new Date(), "eee do LLL yyyy")}</p>
-          <NoteList notes={notes} />
+          <DatePicker
+            showPopperArrow={false}
+            selected={startDate}
+            onChange={(date: Date) => setStartDate(date)}
+            customInput={
+              <p className={styles.date}>
+                {format(startDate, "eee do LLL yyyy")}
+              </p>
+            }
+          />
+
+          <NoteList notes={currentNotes} />
         </div>
       </main>
     </div>
@@ -37,31 +56,8 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   const prisma = new PrismaClient();
-  const current = new Date();
 
-  const notes = await prisma.note.findMany({
-    where: {
-      AND: [
-        {
-          createdAt: {
-            gt: set(current, {
-              hours: 0,
-              minutes: 0,
-              seconds: 0,
-              milliseconds: 0,
-            }),
-          },
-        },
-        { createdAt: { lt: set(current, {
-          hours: 23,
-          minutes: 59,
-          seconds: 59,
-          milliseconds: 999,
-        }) } },
-      ],
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const notes = await getNotesForDate(prisma, new Date());
 
   return {
     props: {

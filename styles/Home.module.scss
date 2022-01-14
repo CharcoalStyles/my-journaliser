@@ -25,6 +25,11 @@
   font-size: 1.5em;
   margin-bottom: 0.25em;
   margin-top: 0.15em;
+  text-decoration: dashed underline;
+  &:hover {
+    cursor: pointer;
+    text-decoration: none;
+  }
 }
 
 @media (max-width: 600px) {
