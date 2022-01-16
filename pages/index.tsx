@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getNotesForDate } from "../src/db/note";
 import DatePicker from "react-datepicker";
+import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 
 type HomeProps = {
@@ -19,8 +20,19 @@ type HomeProps = {
 const Home: NextPage<HomeProps> = ({ notes }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [currentNotes, setCurrentNotes] = useState(notes);
+  const [isLoading, setIsLoading] = useState(false);
+  console.log(currentNotes);
 
-  useEffect(() => {}, [startDate]);
+  useEffect(() => {
+    setIsLoading(true);
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth() + 1;
+    const day = startDate.getDate();
+    axios.get(`/api/note/${year}/${month}/${day}`).then((res) => {
+      setCurrentNotes(res.data);
+      setIsLoading(false);
+    });
+  }, [startDate]);
 
   return (
     <div className={styles.container}>
@@ -44,8 +56,11 @@ const Home: NextPage<HomeProps> = ({ notes }) => {
               </p>
             }
           />
-
-          <NoteList notes={currentNotes} />
+          {isLoading ? (
+            <span>Loading...</span>
+          ) : (
+            <NoteList notes={currentNotes} />
+          )}
         </div>
       </main>
     </div>

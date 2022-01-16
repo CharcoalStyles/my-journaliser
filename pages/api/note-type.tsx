@@ -8,7 +8,7 @@ type ReturnData =
   | string;
 
 type PostData = {
-  noteName: string;
+  noteTypeName: string;
 };
 
 export default async function handler(
@@ -27,19 +27,19 @@ export default async function handler(
         res.status(400).json("Content is required for POST");
         return;
       }
-      const { noteName }: PostData = JSON.parse(req.body);
+      const { noteTypeName }: PostData = JSON.parse(req.body);
 
       if (
         currentTypes.filter(
           (currentType) =>
-            currentType.name.toLowerCase() === noteName.toLowerCase()
+            currentType.name.toLowerCase() === noteTypeName.toLowerCase()
         ).length > 0
       ) {
         res.status(400).json("Note type already exists");
       } else {
         const newType = await prisma.noteType.create({
           data: {
-            name: noteName,
+            name: noteTypeName,
           },
         });
         res.status(201).json({ types: [...currentTypes, newType] });
