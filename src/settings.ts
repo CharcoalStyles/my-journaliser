@@ -25,7 +25,7 @@ export const defaultCollection = initialCollections[0];
 
 export const initialNoteMods: Array<Omit<NoteModifier, "id">> = [
   {
-    name: "Primary",
+    name: "Priority",
     char: "*",
   },
   {
