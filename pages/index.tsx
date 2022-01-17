@@ -28,7 +28,7 @@ const Home: NextPage<HomeProps> = ({ notes }) => {
     const year = startDate.getFullYear();
     const month = startDate.getMonth() + 1;
     const day = startDate.getDate();
-    axios.get(`/api/note/${year}/${month}/${day}`).then((res) => {
+    axios.get(`api/note/${year}/${month}/${day}`).then((res) => {
       setCurrentNotes(res.data);
       setIsLoading(false);
     });
