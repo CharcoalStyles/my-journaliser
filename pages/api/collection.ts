@@ -7,6 +7,11 @@ type ReturnData =
     }
   | string;
 
+type PostData = {
+  name: string;
+  otherDateRequired: boolean;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ReturnData>
@@ -25,25 +30,23 @@ export default async function handler(
         return;
       }
 
-      const { collectionName }: { collectionName: string } = JSON.parse(
-        req.body
-      );
-      if (!collectionName) {
-        res.status(400).json("collectionName is required for POST");
+      const { name, otherDateRequired }: PostData = JSON.parse(req.body);
+      if (!name) {
+        res.status(400).json("name is required for POST");
         return;
       }
       if (
         currentCollections.filter(
           (currentCollections) =>
-            currentCollections.name.toLowerCase() ===
-            collectionName.toLowerCase()
+            currentCollections.name.toLowerCase() === name.toLowerCase()
         ).length > 0
       ) {
         res.status(400).json("Note type already exists");
       } else {
         const newCollection = await prisma.collection.create({
           data: {
-            name: collectionName,
+            name: name,
+            otherDateRequired,
           },
         });
         res
