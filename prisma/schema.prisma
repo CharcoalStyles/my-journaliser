@@ -11,12 +11,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// CHANGE: Add your own note modifiers here
-// enum NoteModifiers {
-//   PRIORITY
-//   INSPIRATION
-// }
-
 model Note {
   id           String         @id @default(dbgenerated()) @map("_id") @db.ObjectId
   body         String
@@ -26,7 +20,9 @@ model Note {
   noteTypeId   String         @db.ObjectId
   collection   Collection     @relation(fields: [collectionId], references: [id])
   collectionId String         @db.ObjectId
-  otherDate    DateTime?
+  targetDay    Int
+  targetMonth  Int
+  targetYear   Int
   noteModIds    String[]
 }
 

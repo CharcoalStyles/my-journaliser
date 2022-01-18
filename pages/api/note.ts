@@ -99,12 +99,17 @@ export default async function handler(
         return;
       } else {
 
+        const date = new Date();
+
         await prisma.note.create({
           data: {
             body,
             noteTypeId: confirmedNoteType,
             collectionId: confirmedCollection,
             noteModIds: confirmedModifiers.map((mod) => mod.id),
+            targetDay: date.getDay(),
+            targetMonth: date.getMonth() + 1,
+            targetYear: date.getFullYear(),
           },
         });
         res.status(201).json("Note created");
