@@ -10,7 +10,7 @@
 }
 
 .content {
-  min-height: 100vh;
+  max-height: 100vh;
   padding-top: calc($header-height * 1.25);
   flex: 1;
   display: flex;

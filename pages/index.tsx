@@ -21,14 +21,14 @@ const Home: NextPage<HomeProps> = ({ notes }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [currentNotes, setCurrentNotes] = useState(notes);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(currentNotes);
 
   useEffect(() => {
     setIsLoading(true);
     const year = startDate.getFullYear();
     const month = startDate.getMonth() + 1;
     const day = startDate.getDate();
-    axios.get(`api/note/${year}/${month}/${day}`).then((res) => {
+    
+    axios.get(`https://finnian.xyz/journal/api/note/${year}/${month}/${day}`).then((res) => {
       setCurrentNotes(res.data);
       setIsLoading(false);
     });
